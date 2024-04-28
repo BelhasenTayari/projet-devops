@@ -46,5 +46,6 @@ jobs:
           python manage.py runserver &
           
       - name: Test debug
-        run: echo "All Good"
+        run: |
+          python manage.py test
         
