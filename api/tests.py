@@ -1,34 +1,23 @@
-from django.test import TestCase
-
 from django.test import TestCase, Client
-from django.urls import reverse
-import json
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from .models import AIModel
 from django.core.files.uploadedfile import SimpleUploadedFile
+import json
 
 class BasicAIAPITestCase(TestCase):
     def setUp(self):
         self.client = Client()
 
     def test_api_returns_empty_list(self):
-        
-        
-        response = self.client.get("http://127.0.0.1:8000/api/models/")
-
-        # Assert status code is 200 (OK)
+        url = reverse('model-list')  # Use the named URL pattern
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-
-        # Parse response content as JSON
         data = json.loads(response.content)
-
-        # Assert that the response contains an empty list
         self.assertEqual(data, [])
 
 class AIModelAPITestCase(APITestCase):
-
     def setUp(self):
         # Create an instance of AIModel
         self.model_instance = AIModel.objects.create(
@@ -43,7 +32,7 @@ class AIModelAPITestCase(APITestCase):
         self.model_instance.model_file.save("model.h5", self.model_file, save=True)
 
     def test_create_ai_model(self):
-        url = "http://127.0.0.1:8000/api/models/"
+        url = reverse('model-list')
         data = {
             'name': 'New AI Model',
             'description': 'This is a new model.',
@@ -58,14 +47,14 @@ class AIModelAPITestCase(APITestCase):
         self.assertEqual(AIModel.objects.count(), 2)
 
     def test_get_model_details(self):
-        url = "http://127.0.0.1:8000/api/models/"
+        url = reverse('model-detail', kwargs={'pk': self.model_instance.pk})  # Use the correct detail URL
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data['name'], 'Test Model')
 
     def test_update_ai_model(self):
-        url = "http://127.0.0.1:8000/api/models/"
+        url = reverse('model-detail', kwargs={'pk': self.model_instance.pk})  # Correct URL for PATCH/PUT
         data = {
             'description': 'Updated description.',
             'accuracy': 98.5
@@ -77,13 +66,13 @@ class AIModelAPITestCase(APITestCase):
         self.assertEqual(float(self.model_instance.accuracy), 98.5)
 
     def test_delete_ai_model(self):
-        url = "http://127.0.0.1:8000/api/models/"
+        url = reverse('model-detail', kwargs={'pk': self.model_instance.pk})  # Correct URL for DELETE
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(AIModel.objects.count(), 0)
 
     def test_invalid_data_rejection(self):
-        url = "http://127.0.0.1:8000/api/models/"
+        url = reverse('model-list')  # URL for POSTing new model
         data = {}  # Empty data should fail as name is required
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
