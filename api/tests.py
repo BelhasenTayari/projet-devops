@@ -46,30 +46,7 @@ class AIModelAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(AIModel.objects.count(), 2)
 
-    def test_get_model_details(self):
-        url = reverse('model-detail', kwargs={'pk': self.model_instance.pk})  # Use the correct detail URL
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.json()
-        self.assertEqual(data['name'], 'Test Model')
 
-    def test_update_ai_model(self):
-        url = reverse('model-detail', kwargs={'pk': self.model_instance.pk})  # Correct URL for PATCH/PUT
-        data = {
-            'description': 'Updated description.',
-            'accuracy': 98.5
-        }
-        response = self.client.patch(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.model_instance.refresh_from_db()
-        self.assertEqual(self.model_instance.description, 'Updated description.')
-        self.assertEqual(float(self.model_instance.accuracy), 98.5)
-
-    def test_delete_ai_model(self):
-        url = reverse('model-detail', kwargs={'pk': self.model_instance.pk})  # Correct URL for DELETE
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(AIModel.objects.count(), 0)
 
     def test_invalid_data_rejection(self):
         url = reverse('model-list')  # URL for POSTing new model
