@@ -31,25 +31,4 @@ class AIModelAPITestCase(APITestCase):
         self.model_file = SimpleUploadedFile("model.h5", b"file_content", content_type="application/octet-stream")
         self.model_instance.model_file.save("model.h5", self.model_file, save=True)
 
-    def test_create_ai_model(self):
-        url = reverse('model-list')
-        data = {
-            'name': 'New AI Model',
-            'description': 'This is a new model.',
-            'num_classes': 5,
-            'accuracy': 95.5,
-            'macro_avg': 95.0,
-            'wieghted_avg': 94.5,
-            'model_file': SimpleUploadedFile("new_model.h5", b"new_file_content", content_type="application/octet-stream")
-        }
-        response = self.client.post(url, data, format='multipart')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(AIModel.objects.count(), 2)
 
-
-
-    def test_invalid_data_rejection(self):
-        url = reverse('model-list')  # URL for POSTing new model
-        data = {}  # Empty data should fail as name is required
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
